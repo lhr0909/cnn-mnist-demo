@@ -40,16 +40,9 @@
 
 
 	</head>
-
-	<style>
-		#infobox {
-			visibility: hidden;
-		}
-	</style>
-
 	<body>
 
-		<div id="webgl_container">
+		<!-- <div id="webgl_container">
 			<div id="infobox">
 				<div id="nodeType"></div>
 				<div id="imageInputContainer">
@@ -79,7 +72,7 @@
 					<div id="nodeOutput" class="math"></div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 		<div id="canvasContainer"> <!--style="visibility: hidden">-->
 			<div id="drawingInterface">
@@ -163,12 +156,12 @@
 
 			var filterNum, filterNum_below;
 			var nodeType;
-			var inputCanvasContainer = document.getElementById("inputCanvasContainer");
-			var filterCanvasContainer = document.getElementById("filterCanvasContainer");
-			var inputCanvas = document.getElementById("inputCanvas");
-			var filterCanvas = document.getElementById("filterCanvas");
-			var inputCtx = inputCanvas.getContext("2d");
-			var filterCtx = filterCanvas.getContext("2d");
+			// var inputCanvasContainer = document.getElementById("inputCanvasContainer");
+			// var filterCanvasContainer = document.getElementById("filterCanvasContainer");
+			// var inputCanvas = document.getElementById("inputCanvas");
+			// var filterCanvas = document.getElementById("filterCanvas");
+			// var inputCtx = inputCanvas.getContext("2d");
+			// var filterCtx = filterCanvas.getContext("2d");
 
 			//var offset = new THREE.Vector3( 10, 10, 10 );
 
@@ -199,7 +192,7 @@
 				controlsPosition: "bottom right",
 				webStorage: 'session',
 				droppable: false
-			});
+			}, updateTinyBoard);
 
 			var tinyCtx = $("#tiny")[0].getContext("2d");
 			tinyCtx.scale(0.1,0.1);
@@ -215,8 +208,6 @@
 				  newCanvas.getContext("2d").putImageData(imageData, 0, 0);
 				  tinyCtx.drawImage(newCanvas, 0, 0);
 				  getNNOutput();
-
-
 			  }
 			};
 

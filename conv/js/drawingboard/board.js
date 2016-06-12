@@ -16,8 +16,9 @@ window.DrawingBoard = typeof DrawingBoard !== "undefined" ? DrawingBoard : {};
  *	stretchImg: default behavior of image setting on the canvas: set to the canvas width/height or not? false by default
  * }
  */
-DrawingBoard.Board = function(id, opts) {
+DrawingBoard.Board = function(id, opts, updateCallback) {
 	this.opts = this.mergeOptions(opts);
+	this.updateCallback = updateCallback;
 
 	this.ev = new DrawingBoard.Utils.MicroEvent();
 
@@ -68,7 +69,7 @@ DrawingBoard.Board = function(id, opts) {
 	this.reset({ webStorage: false, history: true, background: true });
 	this.restoreWebStorage();
 	this.initDropEvents();
-	this.initDrawEvents();
+	this.initDrawEvents(updateCallback);
 };
 
 
@@ -134,9 +135,9 @@ DrawingBoard.Board.prototype = {
 		if (opts.history) this.saveHistory();
 
 		this.blankCanvas = this.getImg();
-		
+
 		this.ev.trigger('board:reset', opts);
-		updateTinyBoard();
+		this.updateCallback();
 	},
 
 	resetBackground: function(background, historize) {
@@ -150,7 +151,7 @@ DrawingBoard.Board.prototype = {
 			this.ctx.fillStyle = background;
 			this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 		} else if (background)
-			this.setImg(background);		
+			this.setImg(background);
 		this.setMode(prevMode);
 		if (historize) this.saveHistory();
 	},
@@ -338,7 +339,7 @@ DrawingBoard.Board.prototype = {
 
 	downloadImg: function() {
 		var img = this.getImg();
-		updateTinyBoard();
+		this.updateCallback();
 		//img = img.replace("image/png", "image/octet-stream");
 		//window.location.href = img;
 	},
@@ -535,7 +536,7 @@ DrawingBoard.Board.prototype = {
 	 * Drawing handling, with mouse or touch
 	 */
 
-	initDrawEvents: function() {
+	initDrawEvents: function(updateCallback) {
 		this.isDrawing = false;
 		this.isMouseHovering = false;
 		this.coords = {};
@@ -554,15 +555,15 @@ DrawingBoard.Board.prototype = {
 		}, this));
 
 		this.dom.$canvas.on('mouseup touchend', $.proxy(function(e) {
-			this._onInputStop(e, this._getInputCoords(e) );
+			this._onInputStop(e, this._getInputCoords(e), updateCallback);
 		}, this));
 
 		this.dom.$canvas.on('mouseover', $.proxy(function(e) {
-			this._onMouseOver(e, this._getInputCoords(e) );
+			this._onMouseOver(e, this._getInputCoords(e), updateCallback);
 		}, this));
 
 		this.dom.$canvas.on('mouseout', $.proxy(function(e) {
-			this._onMouseOut(e, this._getInputCoords(e) );
+			this._onMouseOut(e, this._getInputCoords(e), updateCallback);
 
 		}, this));
 
@@ -623,7 +624,7 @@ DrawingBoard.Board.prototype = {
 		e.preventDefault();
 	},
 
-	_onInputStop: function(e, coords) {
+	_onInputStop: function(e, coords, updateCallback) {
 		if (this.isDrawing && (!e.touches || e.touches.length === 0)) {
 			this.isDrawing = false;
 
@@ -635,10 +636,10 @@ DrawingBoard.Board.prototype = {
 			e.stopPropagation();
 			e.preventDefault();
 		}
-		updateTinyBoard();
+		updateCallback();
 	},
 
-	_onMouseOver: function(e, coords) {
+	_onMouseOver: function(e, coords, updateCallback) {
 		this.isMouseHovering = true;
 		this.coords.old = this._getInputCoords(e);
 		this.coords.oldMid = this._getMidInputCoords(this.coords.old);
@@ -646,11 +647,11 @@ DrawingBoard.Board.prototype = {
 		this.ev.trigger('board:mouseOver', {e: e, coords: coords});
 	},
 
-	_onMouseOut: function(e, coords) {
+	_onMouseOut: function(e, coords, updateCallback) {
 		this.isMouseHovering = false;
 
 		this.ev.trigger('board:mouseOut', {e: e, coords: coords});
-		updateTinyBoard();
+		updateCallback();
 	},
 
 	_getInputCoords: function(e) {
