@@ -5,27 +5,24 @@ body {
 	font-family: Arial;
 	background-color: #222222;
 	background: rgb(60,100,140); /* Old browsers */
-	background: -moz-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%, rgba(30,30,30,1) 100%); /* FF3.6+ */
-	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(60,100,140,1)), color-stop(100%,rgba(30,30,30,1))); /* Chrome,Safari4+ */
-	background: -webkit-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* Opera 12+ */
-	background: -ms-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* IE10+ */
-	background: radial-gradient(ellipse at center,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* W3C */
+	/*background: -moz-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%, rgba(30,30,30,1) 100%); /* FF3.6+ */*/
+	/*background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(60,100,140,1)), color-stop(100%,rgba(30,30,30,1))); /* Chrome,Safari4+ */*/
+	/*background: -webkit-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* Chrome10+,Safari5.1+ */*/
+	/*background: -o-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* Opera 12+ */*/
+	/*background: -ms-radial-gradient(center, ellipse cover,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* IE10+ */*/
+	/*background: radial-gradient(ellipse at center,  rgba(60,100,140,1) 0%,rgba(30,30,30,1) 100%); /* W3C */*/
 
 	margin: 0;
 	font-family: Arial;
-	overflow: hidden;
 }
 #webgl_container {
 	z-index: 10;
 	overflow:hidden;
 }
-#canvasContainer {
+.canvasContainer {
 	z-index: 50;
-	opacity: 0.5;
 	width:292px;
-	position:absolute;
-	top: 0px;
+	display: inline-block;
 	/*right: 0px;
 	padding:5px;
 	overflow:hidden;*/
@@ -37,7 +34,7 @@ body {
 	-o-transition: opacity 0.5s ease;
 	transition: opacity 0.5s ease;
 }
-#canvasContainer:hover {
+.canvascontainer:hover {
 	opacity:1;
 }
 .drawingOutput {
@@ -56,7 +53,7 @@ body {
 	border: solid thin #ccc;
 	overflow:hidden;
 	float:right;
-	
+
 }
 .instructions {
 	color: #fff;
@@ -89,23 +86,23 @@ body {
 	width:300px;
 	position:absolute;
 	bottom:100px;
-	left:100px;	
-	background-color:#def;	
-	
-	opacity: 1;	
-	
+	left:100px;
+	background-color:#def;
+
+	opacity: 1;
+
 	-webkit-transition: opacity 0.5s ease;
 	-moz-transition: opacity 0.5s ease;
 	-ms-transition: opacity 0.5s ease;
 	-o-transition: opacity 0.5s ease;
 	transition: opacity 0.5s ease;
-	
-	
+
+
 	border: thin solid white;
 	-webkit-user-select: none;
-	padding: 0; 
-	margin: 0;	
-	
+	padding: 0;
+	margin: 0;
+
 	/* box-shadow: 5px 5px 10px #000; */
 }
 #infobox:hover {
@@ -114,7 +111,7 @@ body {
 #nodeType {
 	font-weight: bold;
 	text-align: center;
-	background-color: #def;	
+	background-color: #def;
 	padding: 5px;
 }
 #imageInputContainer {
@@ -126,7 +123,7 @@ body {
 	background-color:#bcd;
 	padding: 5px;
 }
-#calcContainer {	
+#calcContainer {
 	background-color:#9ab;
 	padding: 5px;
 }
@@ -145,16 +142,16 @@ body {
 #imageLabel {
 	position:absolute;
 	padding:5px;
-	color:#fff;	
+	color:#fff;
 	text-shadow: 1px 1px #000;
 }
 #filterLabel {
 	position:absolute;
-	color:#fff;	
+	color:#fff;
 	padding:5px;
 	text-shadow: 1px 1px #000;
 }
-#drawingInterface {	
+.drawingInterface {
 	padding: 5px;
 	margin-bottom: 5px;
 	background: rgb(30,35,40);
@@ -174,7 +171,7 @@ body {
 }
 .cell {
   display: table-cell;
-  vertical-align: middle;  
+  vertical-align: middle;
 }
 .settings .question,
 .settings .switch {
@@ -186,7 +183,7 @@ body {
 .settings .question {
   font-size: 18px;
 }
-input.cmn-toggle-yes-no + label {  
+input.cmn-toggle-yes-no + label {
   width: 80px;
   height: 35px;
 }
@@ -222,13 +219,13 @@ input.cmn-toggle-yes-no + label:after {
   -moz-transition: -moz-transform 0.5s;
   -o-transition: -o-transform 0.5s;
   transition: transform 0.5s;
-  
+
   -webkit-transform: rotateY(180deg);
   -moz-transform: rotateY(180deg);
   -ms-transform: rotateY(180deg);
   -o-transform: rotateY(180deg);
   transform: rotateY(180deg);
-  
+
   -webkit-backface-visibility: hidden;
   -moz-backface-visibility: hidden;
   -ms-backface-visibility: hidden;
@@ -272,10 +269,17 @@ input.cmn-toggle-yes-no:checked + label:after {
     color: #FFFFFF;
     background: #990033;
 }
-#filterImage {	
+#filterImage {
 	overflow:hidden;
 }
-#inputImage {	
+#inputImage {
 	overflow:hidden;
-	
+
+}
+.drawingOutput {
+	display: none;
+}
+
+#eval-answer {
+	background: rgb(30,35,40);
 }

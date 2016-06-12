@@ -1,8 +1,8 @@
 function setupWeightArrays() {
 	var maxWeight, minWeight;
 	var i, j, k, l;
-	
-	
+
+
 	conv_weights_1a = [];
 	for (i=0;i<nConvFilters_1;i++) {
 		conv_weights_1a[i] = Create2DArray(filterSize_1,filterSize_1);
@@ -17,24 +17,24 @@ function setupWeightArrays() {
 		minWeight = 100;
 		for (k=0;k<filterSize_1;k++) {
 			for (l=0;l<filterSize_1;l++) {
-				var weight = conv_weights_1a[i][k][l];					
+				var weight = conv_weights_1a[i][k][l];
 				if (weight < minWeight)
 					minWeight = weight;
 				else if (weight > maxWeight)
 					maxWeight = weight;
 			}
 		}
-		
+
 		for (k=0;k<filterSize_1;k++) {
 			for (l=0;l<filterSize_1;l++) {
 				var weight = conv_weights_1a[i][k][l];
 				weight = (weight - minWeight)/(maxWeight-minWeight);
-				conv_weights_1a[i][k][l] = weight;					
+				conv_weights_1a[i][k][l] = weight;
 			}
 		}
 	}
-	
-	
+
+
 	nKeepers = [];
 	for (i=0; i<nConvFilters_2; i++){
 		nKeepers[i] = 0;
@@ -43,20 +43,20 @@ function setupWeightArrays() {
 		}
 		//console.log('keepers = ' + nKeepers[i]);
 	}
-	
+
 	keeperIndices = Create2DArray(nConvFilters_2,nConvFilters_1);
 	for (i=0; i<nConvFilters_2; i++){
 		var keeperCount = 0;
 		for (j=0; j<nConvFilters_1; j++) {
-			keeperIndices[i][j] = keeperCount;		
-			//console.log('keeperIndices[' + i + '][' + j + ']  = ' + keeperIndices[i][j]);			
+			keeperIndices[i][j] = keeperCount;
+			//console.log('keeperIndices[' + i + '][' + j + ']  = ' + keeperIndices[i][j]);
 			if (keepers.e(j+1,i+1)) {
-				keeperCount++;				
+				keeperCount++;
 			}
-		}		
+		}
 	}
-	
-	
+
+
 	conv_weights_2a = [];
 	for (i=0;i<nConvFilters_2;i++) {
 		conv_weights_2a[i] = [];
@@ -89,7 +89,7 @@ function setupWeightArrays() {
 							maxWeight = weight;
 					}
 				}
-			
+
 				for (j=0;j<filterSize_1;j++) {
 					for (k=0;k<filterSize_1;k++) {
 						var weight = conv_weights_2a[i][l][j][k];
@@ -98,11 +98,11 @@ function setupWeightArrays() {
 					}
 				}
 			}
-			
+
 		}
 	}
-	
-	
+
+
 	hidden_weights_1a = Create2DArray(nHiddenNodes_1,nPixels);
 	maxWeight = -100;
 	minWeight = 100;
@@ -121,7 +121,7 @@ function setupWeightArrays() {
 			hidden_weights_1a[i-1][j-1] = (weight - minWeight)/(maxWeight-minWeight);
 		}
 	}
-	
+
 	hidden_weights_2a = Create2DArray(nHiddenNodes_2,nHiddenNodes_1);
 	maxWeight = -100;
 	minWeight = 100;
@@ -140,7 +140,7 @@ function setupWeightArrays() {
 			hidden_weights_2a[i-1][j-1] = (weight - minWeight)/(maxWeight-minWeight);
 		}
 	}
-	
+
 	final_weightsa = Create2DArray(nFinalNodes,nHiddenNodes_2);
 	maxWeight = -100;
 	minWeight = 100;
@@ -159,27 +159,27 @@ function setupWeightArrays() {
 			final_weightsa[i-1][j-1] = (weight - minWeight)/(maxWeight-minWeight);
 		}
 	}
-	
+
 }
 
 
-function getNNOutput() {
+function getNNOutput(tinyCtx, elGuess1, elGuess2) {
 	var i, j, m, n, k, f;
 	imageData = tinyCtx.getImageData(0, 0, 28, 28);
-	
-	
+
+
 	var data = imageData.data;
-	
+
 	for (i=0; i<nNodes; i++) {
 		allNodeInputs[i] = 0;
 		allNodeOutputs[i] = 0;
 		allNodeNums[i] = i+1;
 		allNodeOutputsRaw[i] = 0;
 	}
-	
+
 	var pixel = 0;
 	input = new Array(nPixels);
-	
+
 	for(i = 0, n = data.length; i < n; i += 4) {
 		if (goodStart){
 			if (data[i]) {
@@ -194,24 +194,24 @@ function getNNOutput() {
 		pixel++;
 	}
 	allZeroes = false;
-	
+
 	input32 = reshapeAndPadArray(input); // this is how matlab likes it.
 	input32transpose = reshapeArray(input32); // this is how java likes it.
-	
+
 	for (i=0; i<nPixels; i++) {
 		allNodeInputs[i] = input32transpose[i];
 		allNodeOutputs[i] = input32transpose[i];
 		allNodeNums[i] = i+1;
 	}
-		
+
 	var image = reshapeToMat(input32);
-	
+
 	var convLayer = 0;
 	var inputImageSize = 32;
-	
+
 	var halfFilter = math.floor(filterSize_1/2);
 	var count = nPixels;
-	
+
 	var featMapArray_1 = [];
 	var outputImageSize = inputImageSize - halfFilter;
 	for (f=0; f<nConvFilters_1; f++) {
@@ -224,7 +224,7 @@ function getNNOutput() {
 					for (n=-halfFilter; n<=halfFilter; n++) {
 						outputImage[i][j] = outputImage[i][j] + image[i+m][j+n] * conv_nodes[convLayer][f].e(m+halfFilter+1,n+halfFilter+1);
 					}
-				}				
+				}
 				var convOut = outputImage[i][j];
 				featMapArray_1[f][i][j] = sigma(convOut + conv_biases_1.e(f+1));
 				allNodeInputs[count] = convOut;
@@ -235,8 +235,8 @@ function getNNOutput() {
 			}
 		}
 	}
-	//console.log('got count = ' + count); // 1024 + 28*28*6 = 5728	
-	
+	//console.log('got count = ' + count); // 1024 + 28*28*6 = 5728
+
 	var downMapSize = (outputImageSize-halfFilter)/2;
 	var downMaps_1 = [];
 	for (f=0; f<nConvFilters_1; f++) {
@@ -244,7 +244,7 @@ function getNNOutput() {
 		for (i=0;i<downMapSize;i++){
 			for (j=0;j<downMapSize;j++){
 				var outputHere = downMaps_1[f][i][j];
-				allNodeInputs[count] = outputHere; 
+				allNodeInputs[count] = outputHere;
 				allNodeOutputs[count] = outputHere;
 				allNodeOutputsRaw[count] = outputHere;
 				allNodeNums[count] = count-nPixels-nConvNodes_1-14*14*f+1;
@@ -253,7 +253,7 @@ function getNNOutput() {
 		}
 	}
 	//console.log('got count = ' + count); // 1024 + 28*28*6 + 14*14*6 = 6904
-	
+
 	var featMapArray_2 = [];
 	convLayer = 1;
 	halfFilter = math.floor(filterSize_2/2);
@@ -271,7 +271,7 @@ function getNNOutput() {
 						image = downMaps_1[k];
 						outputImage[i][j] = 0;
 						for (m=-halfFilter; m<=halfFilter; m++) {
-							for (n=-halfFilter; n<=halfFilter; n++) {								
+							for (n=-halfFilter; n<=halfFilter; n++) {
 								outputImage[i][j] = outputImage[i][j] + image[i+m][j+n] * conv_nodes[convLayer][f][keeperCount].e(m+halfFilter+1,n+halfFilter+1);
 							}
 						}
@@ -283,13 +283,13 @@ function getNNOutput() {
 				allNodeInputs[count] = convOut;
 				allNodeOutputs[count] = sigma(convOut + conv_biases_2.e(f+1));
 				allNodeOutputsRaw[count] = sigma(convOut + conv_biases_2.e(f+1));
-				allNodeNums[count] = count-nPixels-nConvNodes_1-nConvNodes_1_down-10*10*f+1;				
+				allNodeNums[count] = count-nPixels-nConvNodes_1-nConvNodes_1_down-10*10*f+1;
 				count++;
 			}
 		}
 	}
 	//console.log('got count = ' + count); // 1024 + 28*28*6 + 14*14*6 + 10*10*16 = 8504
-	
+
 	downMapSize = (outputImageSize-halfFilter)/2;
 	downMaps_2 = [];
 	var inputArray = [];
@@ -298,7 +298,7 @@ function getNNOutput() {
 		for (i=0;i<downMapSize;i++){
 			for (j=0;j<downMapSize;j++){
 				var outputHere = downMaps_2[f][i][j];
-				allNodeInputs[count] = outputHere; 
+				allNodeInputs[count] = outputHere;
 				allNodeOutputs[count] = outputHere;
 				allNodeOutputsRaw[count] = outputHere;
 				allNodeNums[count] = count-nPixels-nConvNodes_1-nConvNodes_1_down-nConvNodes_2-5*5*f+1;
@@ -310,16 +310,16 @@ function getNNOutput() {
 	//console.log('got count = ' + count); // 1024 + 28*28*6 + 14*14*6 + 10*10*16 + 5*5*16 = 8904
 	var fcCountStart = count;
 	var inp = Vector.create(inputArray);
-	
+
 	var hidden_outputs_1 = Vector.Zero(nHiddenNodes_1);
 	var hidden_outputs_1a = new Array(nHiddenNodes_1);
 	var hidden_outputs_2 = Vector.Zero(nHiddenNodes_2);
 	var hidden_outputs_2a = new Array(nHiddenNodes_2);
 	var final_outputsa = new Array(nFinalNodes);
-	
+
 	for (i=1; i<=nHiddenNodes_1; i++){
 	  if (!allZeroes){
-		  var weights = hidden_weights_1.row(i);		  
+		  var weights = hidden_weights_1.row(i);
 		  var sum = inp.dot(weights);
 		  sum += hidden_biases_1.e(i);
 		  hidden_outputs_1a[i-1] = sigma(sum);
@@ -333,16 +333,16 @@ function getNNOutput() {
 	  allNodeNums[fcCountStart+i-1] = i;
 	}
 	hidden_outputs_1.setElements(hidden_outputs_1a);
-	
+
 	for (i=1; i<=nHiddenNodes_2; i++){
 	  if (!allZeroes){
-		  var weights = hidden_weights_2.row(i);				  
+		  var weights = hidden_weights_2.row(i);
 		  var sum = hidden_outputs_1.dot(weights);
 		  sum += hidden_biases_2.e(i);
 		  hidden_outputs_2a[i-1] = sigma(sum);
 		  allNodeInputs[fcCountStart+nHiddenNodes_1+i-1]=sum;
 		  allNodeOutputs[fcCountStart+nHiddenNodes_1+i-1]=hidden_outputs_2a[i-1];
-		  
+
 	  } else {
 		  hidden_outputs_2a[i-1] = 0;
 		  allNodeInputs[fcCountStart+nHiddenNodes_1+i-1]=0;
@@ -351,10 +351,10 @@ function getNNOutput() {
 	  allNodeNums[fcCountStart+nHiddenNodes_1+i-1] = i;
 	}
 	hidden_outputs_2.setElements(hidden_outputs_2a);
-	
+
 	var sums = final_weights.x(hidden_outputs_2);
 	var newSums = sums.add(final_biases);
-	
+
 	for (i=1; i<=nFinalNodes; i++){
 	  if (!allZeroes){
 		final_outputsa[i-1] = sigma(newSums.e(i));
@@ -367,29 +367,31 @@ function getNNOutput() {
 	  }
 		allNodeNums[fcCountStart+nHiddenNodes_1+nHiddenNodes_2+i-1] = i;
 	}
-	
+
 	allNodeOutputsRaw = allNodeOutputs.slice();
 	normalizeWithinLayer(allNodeOutputs);
-	
+
 	if (!allZeroes){
 		ind1 = maxInd(final_outputsa);
 		finalOutputID = fcCountStart+nHiddenNodes_1+nHiddenNodes_2+i-1 + ind1 - 10;
 		final_outputsa[ind] = -10;
 		ind2 = maxInd(final_outputsa);
-		document.getElementById("ans1").innerHTML = ind1;
-		document.getElementById("ans2").innerHTML = ind2;
+		elGuess1.innerHTML = ind1;
+		elGuess2.innerHTML = ind2;
 	} else {
-		document.getElementById("ans1").innerHTML = "";
-		document.getElementById("ans2").innerHTML = "";
+		if (elGuess1 && elGuess2) {
+			elGuess1.innerHTML = "";
+			elGuess2.innerHTML = "";
+		}
 	}
-	
+
 	isComputed = true;
 
 	updateCubes();
 	updateEdges();
-	
+
 	imageData.data = null;
-	imageData = null;	
+	imageData = null;
 };
 
 function sigma(x) {
@@ -422,7 +424,7 @@ function maxInd(arr) {
 		if (arr[i]>val){
 			ind = i;
 			val = arr[i];
-		}				
+		}
 	}
 	return ind;
 }
@@ -434,7 +436,7 @@ function normalizeWithinLayer(arr) {
 	var minHidden1 = 100;
 	var minHidden2 = 100;
 	var minFinal = 100;
-	
+
 	var maxPixel = -100;
 	var minConv1 = [100, 100, 100, 100, 100, 100];
 	var minConv2 = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100];
@@ -457,27 +459,27 @@ function normalizeWithinLayer(arr) {
 			for (j=1; j<=nConvFilters_1; j++) {
 				if(i>=nPixels+28*28*(j-1) && i<nPixels+28*28*j) {
 					if (arr[i]>maxConv1[j-1])
-						maxConv1[j-1] = arr[i];					
+						maxConv1[j-1] = arr[i];
 					else if (arr[i]<minConv1[j-1])
-						minConv1[j-1] = arr[i];					
+						minConv1[j-1] = arr[i];
 				}
 			}
 		} else if (i < nPixels+nConvNodes_1+nConvNodes_1_down) {
 			for (j=1; j<=nConvFilters_1; j++) {
 				if(i>=nPixels+nConvNodes_1+14*14*(j-1) && i<nPixels+nConvNodes_1+14*14*j) {
 					if (arr[i]>maxConv1_down[j-1])
-						maxConv1_down[j-1] = arr[i];					
+						maxConv1_down[j-1] = arr[i];
 					else if (arr[i]<minConv1_down[j-1])
-						minConv1_down[j-1] = arr[i];					
+						minConv1_down[j-1] = arr[i];
 				}
 			}
 		} else if (i < nPixels+nConvNodes_1+nConvNodes_1_down+nConvNodes_2) {
 			for (j=1; j<=nConvFilters_2; j++) {
 				if(i>=nPixels+nConvNodes_1+nConvNodes_1_down+10*10*(j-1) && i<nPixels+nConvNodes_1+nConvNodes_1_down+10*10*j) {
 					if (arr[i]>maxConv2[j-1])
-						maxConv2[j-1] = arr[i];					
+						maxConv2[j-1] = arr[i];
 					else if (arr[i]<minConv2[j-1])
-						minConv2[j-1] = arr[i];					
+						minConv2[j-1] = arr[i];
 				}
 			}
 		} else if (i < nPixels+nConvNodes_1+nConvNodes_1_down+nConvNodes_2+nConvNodes_2_down+nHiddenNodes_1) {
@@ -500,7 +502,7 @@ function normalizeWithinLayer(arr) {
 	if (minPixel==maxPixel){
 		allZeroes = true;
 		for (i=0;i<len;i++){
-			arr[i] = 0;					
+			arr[i] = 0;
 		}
 	} else {
 		allZeroes = false;
@@ -539,7 +541,7 @@ function normalizeWithinLayer(arr) {
 function reshapeToMat(vectIm){
 	var newIm = Create2DArray(32,32);
 	for (count = 0; count < 1024; count++){
-		var row = (count % 32);   
+		var row = (count % 32);
 		var col = math.floor(count/32);
 		newIm[row][col] = vectIm[count];
 	}
@@ -577,7 +579,7 @@ function Create2DArray(rows,columns) {
 }
 
 function maxPool(inputMap, poolSize, inputImageSize) {
-	
+
 	// for the first layer at least, the input image is padded by 2 rows and 2 cols
 	var i,j,m,n;
 	var stride = poolSize;
@@ -605,5 +607,5 @@ function maxPool(inputMap, poolSize, inputImageSize) {
 		downi++;
 	}
 	return downMap;
-	
+
 }

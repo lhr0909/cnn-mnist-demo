@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 	<head>
-		<title>3D Visualization of a Convolutional Neural Network</title>
+		<title>手写数字</title>
 		<link rel="stylesheet" href="css/drawingboard2.css">
 		<link rel="stylesheet" href="css/main5.css">
 		<link rel="stylesheet" type="text/css" href="css/katex.min.css">
@@ -40,6 +40,7 @@
 
 
 	</head>
+
 	<body>
 
 		<!-- <div id="webgl_container">
@@ -74,9 +75,9 @@
 			</div>
 		</div> -->
 
-		<div id="canvasContainer"> <!--style="visibility: hidden">-->
-			<div id="drawingInterface">
-				<div class="instructions">Draw your number here</div>
+		<div class="canvasContainer"> <!--style="visibility: hidden">-->
+			<div class="drawingInterface">
+				<div class="instructions">写下加数</div>
 				<div class="board" id="custom-board"></div>
 				<div class="drawingOutput">
 					<div class="row">
@@ -96,6 +97,31 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="canvasContainer"> <!--style="visibility: hidden">-->
+			<div class="drawingInterface">
+				<div class="instructions">写下被加数</div>
+				<div class="board" id="custom-board2"></div>
+				<div class="drawingOutput">
+					<div class="row">
+						<div class="info">Downsampled drawing:</div>
+						<div class="tinyBoard">
+							<canvas id="tiny2"></canvas>
+						</div>
+					</div>
+					<div class="row">
+						<div class="info cell">First guess:</div>
+						<div id="ans3" class="ans cell"></div>
+					</div>
+					<div class="row cell">
+						<div class="info cell">Second guess:</div>
+						<div id="ans4" class="ans cell"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="instructions" id="eval-answer">0 + 0 = 0</div>
 
 		<script>
 
@@ -187,7 +213,7 @@
 				size: 30,
 				controls: [
 					{ Navigation: { back: false, forward: false } },
-					{ DrawingMode: { filler: false } }
+					{ DrawingMode: { filler: false, pencil: false, eraser: false } }
 				],
 				controlsPosition: "bottom right",
 				webStorage: 'session',
@@ -207,10 +233,47 @@
 
 				  newCanvas.getContext("2d").putImageData(imageData, 0, 0);
 				  tinyCtx.drawImage(newCanvas, 0, 0);
-				  getNNOutput();
+				  getNNOutput(tinyCtx, document.getElementById("ans1"), document.getElementById("ans2"));
+					getEvalAnswer();
 			  }
 			};
 
+			var customBoard2 = new DrawingBoard.Board('custom-board2', {
+				background: "#000",
+				color: "#fff",
+				size: 30,
+				controls: [
+					{ Navigation: { back: false, forward: false } },
+					{ DrawingMode: { filler: false, pencil: false, eraser: false } }
+				],
+				controlsPosition: "bottom right",
+				webStorage: 'session',
+				droppable: false
+			}, updateTinyBoard2);
+
+			var tinyCtx2 = $("#tiny2")[0].getContext("2d");
+			tinyCtx2.scale(0.1,0.1);
+			function updateTinyBoard2() {
+				if (goodStart){
+
+					var imageData = customBoard2.getImg();
+
+					var newCanvas = $("<canvas>")
+					.attr("width", imageData.width)
+					.attr("height", imageData.height)[0];
+
+					newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+					tinyCtx2.drawImage(newCanvas, 0, 0);
+					getNNOutput(tinyCtx2, document.getElementById("ans3"), document.getElementById("ans4"));
+					getEvalAnswer();
+				}
+			};
+
+			function getEvalAnswer() {
+				var number1 = parseInt(document.getElementById("ans1").innerHTML) || 0;
+				var number2 = parseInt(document.getElementById("ans3").innerHTML) || 0;
+				document.getElementById("eval-answer").innerHTML = number1 + " + " + number2 + " = " + (number1 + number2);
+			}
 
 			init();
 			loadData();
